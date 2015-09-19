@@ -14,7 +14,8 @@ import java.util.concurrent.atomic.*;
  * the entire list to get to the tail such that we hold both the last node as well as its predecessor
  * node, making best-case scenario at least O(n).
  *
- * JDK collections were not used, but inspiration was taken from the JDK.
+ * JDK collections were not used, but inspiration was taken from the JDK as well as other concurrency
+ * literature.
  *
  * @author hamendi
  */
