@@ -14,7 +14,7 @@ public class LockLessLinkedListTailLIFOTest {
 
     private final static int THREADS = 8;
     private final static int TEST_SIZE = 128;
-    LockLessLinkedListTailLIFO<Integer> instance = new LockLessLinkedListTailLIFO<>();
+    LockLessLinkedListTailLIFO<Object> instance = new LockLessLinkedListTailLIFO<>();
     Thread[] thread = new Thread[THREADS];
 
     @Test
@@ -58,7 +58,7 @@ public class LockLessLinkedListTailLIFOTest {
             instance.push(i);
         }
         for (int i = TEST_SIZE-1; i > 0; i--) {
-            Assert.assertTrue(i == instance.pop());
+            Assert.assertTrue(instance.pop().equals(i));
         }
     }
 

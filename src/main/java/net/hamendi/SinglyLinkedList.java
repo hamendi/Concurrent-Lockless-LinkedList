@@ -18,6 +18,11 @@ package net.hamendi;
  * therefore provided conventional return types for similar methods often found
  * in similar collection implementations.
  *
+ * Although the requirements do not limit the list to a homogenous structure, the
+ * interface will allow usage that restricts the list to a specific type through
+ * generics or, as the requirements above, the generic type Object can be used to
+ * instantiate a heterogenous list.
+ *
  * @author hamendi
  *
  */
