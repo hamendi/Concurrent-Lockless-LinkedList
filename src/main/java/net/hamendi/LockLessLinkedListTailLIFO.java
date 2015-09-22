@@ -40,7 +40,7 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
      * @return T the last element in the list, if the list is empty, then null.
      */
     public T pop() {
-        while (true) {
+        outer: while (true) {
             if (head.getNext() == null) { //empty list, nothing to pop
                 return null;
             }
@@ -49,11 +49,12 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
             Node<T> right = left.getNext();
             //traverse the list to find the last 2 nodes, left for previous to last and right as very last
             while (right != tail) {
+                if (left == null) { continue outer; }
                 left = left.getNext();
+                if (right == null) { continue outer; }
                 right = right.getNext();
             } //end of list reached, now check stat unchanged
-            if (oldTail == tail) { //checking state, true -> we're in a quiescent state and can try to proceed
-                casTail(oldTail, left);
+            if (casTail(oldTail, left)) { //checking state, true -> we're in a quiescent state and can try to proceed
                 tail.casNext(right, null);
                 return right.getElement();
             }
@@ -95,6 +96,9 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
      * same value is inserted more than once in the list, this method will insert the
      * new node after the first instance of the "after" element.
      *
+     * Sorry for the messy code in this method, i am sure it can be made pretty, but
+     * I will not optimize it for now since it is doing the job :)
+     *
      * @param elem new node inserted after the "after" element.
      * @param after this node must already be in the list, else nothing is inserted.
      * @return true on success
@@ -108,7 +112,7 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
             return false; //empty list or after node not present in list
         }
         Node<T> newNode = new Node<>(elem, null);
-        while (true) {
+        outer: while (true) {
             Node<T> oldTail = tail;
             Node<T> left = head.getNext();
             Node<T> right = left.getNext();
@@ -120,20 +124,26 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
                     }
                 }
             }
-            if (tail.getElement().equals(after)) { //after is last element, so same as push
-                return push(elem);
+            if (tail.getElement().equals(after)) {
+                return push(elem); //after is last element, so same as push.
+                // This check is here (and not at the beginning) so that the method inserts after
+                // the first occurrence of the 'after' object consistently.
             }
             //traverse the list to find the last 2 nodes, left for previous to last and right as very last
             while (right != tail) {
                 if (left.getElement().equals(after)) {
                     break;
                 }
+                if (left == null) { continue outer; }
                 left = left.getNext();
+                if (right == null) { continue outer; }
                 right = right.getNext();
             } //end of list reached, now check stat unchanged
             if (oldTail == tail) { //checking state, true -> we're in a quiescent state and can try to proceed
-                if (newNode.casNext(null, right) && left.casNext(right, newNode)) {
-                    return true; //success
+                if (newNode.casNext(null, right)) {
+                    if (left.casNext(right, newNode)) {
+                        return true; //success
+                    }
                 }
             }
         }

@@ -3,7 +3,7 @@ package net.hamendi;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Random;
+import java.util.*;
 
 /**
  * Test class for the LockLessLinkedListTailLIFO
@@ -14,7 +14,7 @@ public class LockLessLinkedListTailLIFOTest {
 
     private final static int THREADS = 8;
     private final static int TEST_SIZE = 128;
-    LockLessLinkedListTailLIFO<Object> instance = new LockLessLinkedListTailLIFO<>();
+    SinglyLinkedList<Object> instance = new LockLessLinkedListTailLIFO<>();
     Thread[] thread = new Thread[THREADS];
 
     @Test
@@ -38,7 +38,7 @@ public class LockLessLinkedListTailLIFOTest {
 
     @Test
     public void testNull() {
-        System.out.println("Null");
+        System.out.println("Null check");
         new Thread(new Poper()).start();
         new Thread(new Inserter(2,0)).start(); //false
         new Thread(new Pusher(1)).start();
