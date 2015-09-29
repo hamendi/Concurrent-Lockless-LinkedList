@@ -114,6 +114,7 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
         Node<T> newNode = new Node<>(elem, null);
         outer: while (true) {
             Node<T> oldTail = tail;
+            Node<T> nullEnd = oldTail.getNext();
             Node<T> left = head.getNext();
             Node<T> right = left.getNext();
             if (right == null) { //list only had 1 element
@@ -124,10 +125,18 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
                     }
                 }
             }
-            if (tail.getElement().equals(after)) {
-                return push(elem); //after is last element, so same as push.
-                // This check is here (and not at the beginning) so that the method inserts after
-                // the first occurrence of the 'after' object consistently.
+            if (oldTail.getElement().equals(after)) { //last element
+                if (oldTail == tail) { //checking state, true -> we're in a quiescent state and can try to proceed
+                    if (nullEnd == null) { //checking state, true -> we're still in a quiescent state and can try to proceed with our own insertion
+                        if (oldTail.casNext(nullEnd, newNode)) { //true -> linking the new node from the current last node successful
+                            casTail(oldTail, newNode); //pointing tail to the new last node
+                            return true; //success
+                        }
+                        //false -> CAS failed, state unchanged, and thread will try loop once more.
+                    } else { //nullEnd not null, list must be in an intermediate state, help out by moving the tail pointer forward
+                        casTail(oldTail, nullEnd);
+                    }
+                }
             }
             //traverse the list to find the last 2 nodes, left for previous to last and right as very last
             while (right != tail) {
@@ -141,9 +150,8 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
             } //end of list reached, now check stat unchanged
             if (oldTail == tail) { //checking state, true -> we're in a quiescent state and can try to proceed
                 if (newNode.casNext(null, right)) {
-                    if (left.casNext(right, newNode)) {
-                        return true; //success
-                    }
+                    left.casNext(right, newNode);
+                    return true; //success
                 }
             }
         }
