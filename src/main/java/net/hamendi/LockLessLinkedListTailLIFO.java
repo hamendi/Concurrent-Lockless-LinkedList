@@ -3,19 +3,16 @@ package net.hamendi;
 import java.util.concurrent.atomic.*;
 
 /**
- * To implement the methods provided in the task, i have chosen to use nonblocking synchronization to
- * eliminate locks and only rely on built-in atomic operations for synchronization because lock-free
- * data structures perform better. Non-blocking algorithms use atomic read-modify-write instructions,
- * such as compare-and-swap (CAS). Null elements not permit.
+ * To implement the methods, i have chosen to use nonblocking synchronization to eliminate locks and 
+ * only rely on built-in atomic operations for synchronization because lock-free data structures 
+ * perform better. Non-blocking algorithms use atomic read-modify-write instructions, such as 
+ * compare-and-swap (CAS). 
  *
- * Because the requirement asked to implement a "singly" linked list with elements added and removed
- * specifically from the "end", I did not use the easier path of implementing a stack that pushes and
- * pops from the head. Instead elements are pushed to the tail end, but the "pop" method must traverse
- * the entire list to get to the tail such that we hold both the last node as well as its predecessor
- * node, making best-case scenario at least O(n).
- *
- * JDK collections were not used, but inspiration was taken from the JDK as well as other concurrency
- * literature.
+ * To implement a "singly" linked list with elements added and removed specifically from the "end", I 
+ * did not use the easier path of implementing a stack that pushes and pops from the head. Instead 
+ * elements are pushed to the tail end, but the "pop" method must traverse the entire list to get to 
+ * the tail such that we hold both the last node as well as its predecessor node, making best-case 
+ * scenario at least O(n). Null elements not permit.
  *
  * @author hamendi
  */
@@ -96,8 +93,8 @@ public class LockLessLinkedListTailLIFO<T>  implements SinglyLinkedList<T> {
      * same value is inserted more than once in the list, this method will insert the
      * new node after the first instance of the "after" element.
      *
-     * Sorry for the messy code in this method, i am sure it can be made pretty, but
-     * I will not optimize it for now since it is doing the job :)
+     * Messy code in this method, i am sure it can be made pretty, but I will not optimize 
+     * it for now since it is doing the job :)
      *
      * @param elem new node inserted after the "after" element.
      * @param after this node must already be in the list, else nothing is inserted.
